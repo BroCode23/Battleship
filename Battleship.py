@@ -1,10 +1,8 @@
 import random
-brk = False
-s = " "
 eshots = []
 time = 1
-boat = 5
 num = ["0","1","2","3","4","5","6","7","8","9","10"]
+
 player = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
           [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
           [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
@@ -38,228 +36,143 @@ hidden = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
           [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
           [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
 
-def board():
-    print("      YOUR BOATS")
+def print_board(input_board, player):
+    if player:
+		print("      YOUR BOATS")
+	else:
+		print("      ENEMY BOATS")
     print("   1 2 3 4 5 6 7 8 9 10")
-    print("1  " + s.join(player[0]))
-    print("2  " + s.join(player[1]))
-    print("3  " + s.join(player[2]))
-    print("4  " + s.join(player[3]))
-    print("5  " + s.join(player[4]))
-    print("6  " + s.join(player[5]))
-    print("7  " + s.join(player[6]))
-    print("8  " + s.join(player[7]))
-    print("9  " + s.join(player[8]))
-    print("10 " + s.join(player[9]))
+    print("1  " + " ".join(input_board[0]))
+    print("2  " + " ".join(input_board[1]))
+    print("3  " + " ".join(input_board[2]))
+    print("4  " + " ".join(input_board[3]))
+    print("5  " + " ".join(input_board[4]))
+    print("6  " + " ".join(input_board[5]))
+    print("7  " + " ".join(input_board[6]))
+    print("8  " + " ".join(input_board[7]))
+    print("9  " + " ".join(input_board[8]))
+    print("10 " + " ".join(input_board[9]))
 
-def enemy():
-    print("      ENEMY BOATS")
-    print("   1 2 3 4 5 6 7 8 9 10")
-    print("1  " + s.join(comp[0]))
-    print("2  " + s.join(comp[1]))
-    print("3  " + s.join(comp[2]))
-    print("4  " + s.join(comp[3]))
-    print("5  " + s.join(comp[4]))
-    print("6  " + s.join(comp[5]))
-    print("7  " + s.join(comp[6]))
-    print("8  " + s.join(comp[7]))
-    print("9  " + s.join(comp[8]))
-    print("10 " + s.join(comp[9]))
+def place_boats(board, player -> int): #player: True for human, False for computer
+	time = 1
+	while time < 6: #computer boat placement
+    	y = 0
+    	top = -1
+    	lef = -1
+    	choice = ""
+          
+		if player:
+			print("|\n|\n|\n|\n|")
+    		print_board(player)
+		
+    	if time == 1: #game timer
+        	boat = 5 #variable for boat length (pegs)
+			if player:
+				print("Aircraft Carrier (5 pegs)")
+    	elif time == 2:
+        	boat = 4
+			if player:
+				print("Battleship (4 pegs)")
+    	elif time == 3:
+        	boat = 3
+			if player:
+				print("Submarine (3 pegs)")
+    	elif time == 4:
+        	boat = 3
+			if player:
+				print("Cruiser (3 pegs)")
+    	elif time == 5:
+        	boat = 2
+			if player:
+				print("Destroyer (2 pegs)")
+		
+		if player:
+			while not (choice == "v" or choice == "h"): #input loop
+				choice = input("Orientation? (v/h)")[0].lower()
+				if choice == "v":
+					orient = True
+				elif choice == "h":
+					orient = False
+				else:
+					continue
+		else:
+			orient = random.randint(0,1)
+			
+		if orient: #vertical
+			if player:
+				while not 0 <= top <= (10 - boat): #positions boat placement from top
+					while num.count(top) == 0:
+						top = input("Space from top?")
+					top = int(top)
+				while not 0 <= lef <= 9: #positioning from left
+					while num.count(lef) == 0:
+						lef = input("Space from left?")
+					lef = int(lef)
+			else:
+				top = random.randint(0,(9 - boat))
+				lef = random.randint(0,9)
+		else:
+			if player:
+				while not 0 <= top <= 9:
+					while num.count(top) == 0:
+						top = input("Space from top?")
+					top = int(top)
+				while not 0 <= lef <= (10 - boat):
+					while num.count(lef) == 0:
+						lef = input("Space from left?")
+					lef = int(lef)
+			else:	
+				top = random.randint(0,9)
+				lef = random.randint(0,(9 - boat))
+				
+		while y < boat and board[top][lef] != "O":
+			board[top][lef] = "O"
+			if orient:
+				top += 1
+			else:
+				lef += 1
+			y += 1
+		if board[top][lef] == "O": #if it hits another boat while placing, it removes the partial of the boat placed
+			while y > 0:
+				if orient:
+					top -= 1
+				else:
+					lef -= 1
+				y -= 1
+				board[top][lef] = "."
+			if player:
+				print("your boats collided! Reposition your boat.")
+			continue
+		time += 1
+	return
+    
+def player_turn():
+	top = -1
+	lef = -1
+	#player's turn
+	while not 0 <= lef <= 9: #coordinates for shot
+		while num.count(lef) == 0:
+			lef = input("X coordinate?")
+		lef = int(lef) - 1
+	while not 0 <= top <= 9: #coordinates for shot
+		while num.count(top) == 0:
+			top = input("Y coordinate?")
+		top = int(top) - 1
+	if hidden[top][lef] == "." and comp[top][lef] == ".":
+		comp[top][lef] = "$"
+		print("We missed, Cap'n.")
+	elif hidden[top][lef] == "O" and comp[top][lef] == ".":
+		comp[top][lef] = "X"
+		print("We got 'em!")
+	elif comp[top][lef] == "$" or comp[top][lef] == "X":
+		print("Oops, we already shot there.")
+	else:
+		print("What just happened?")
+	return
 
-def hid():
-    print("      HIDDEN BOATS")
-    print("   1 2 3 4 5 6 7 8 9 10")
-    print("1  " + s.join(hidden[0]))
-    print("2  " + s.join(hidden[1]))
-    print("3  " + s.join(hidden[2]))
-    print("4  " + s.join(hidden[3]))
-    print("5  " + s.join(hidden[4]))
-    print("6  " + s.join(hidden[5]))
-    print("7  " + s.join(hidden[6]))
-    print("8  " + s.join(hidden[7]))
-    print("9  " + s.join(hidden[8]))
-    print("10 " + s.join(hidden[9]))
-
-print("      BATTLESHIP")
-
-#Board setup
-while time < 6: #computer boat placement
-    y = 0
-    top = -1
+def computer_turn(x, l, h):
+	top = -1
     lef = -1
-    orient = ""
-
-    if time == 1: #game timer
-        boat = 5 #variable for boat length (pegs)
-    elif time == 2:
-        boat = 4
-    elif time == 3:
-        boat = 3
-    elif time == 4:
-        boat = 3
-    elif time == 5:
-        boat = 2
-
-    orient = random.randint(0,1)
-    if orient: #vertical
-        top = random.randint(0,(9 - boat))
-        lef = random.randint(0,9)
-    else: #horizontal
-        top = random.randint(0,9)
-        lef = random.randint(0,(9 - boat))
-
-    if orient: #vertical
-        while y < boat and hidden[top][lef] != "O":
-            hidden[top][lef] = "O"
-            top += 1
-            y += 1
-        if hidden[top][lef] == "O": #if it hits another boat while placing, it removes the partial of the boat placed
-            while y > 0:
-                top -= 1
-                y -= 1
-                hidden[top][lef] = "."
-            continue
-        time += 1
-    else: #horizontal
-        while y < boat and hidden[top][lef] != "O": #places the boat
-            hidden[top][lef] = "O"
-            lef += 1
-            y += 1
-        if hidden[top][lef] == "O":  # checks if a boat was already placed there
-            while y > 0:  # while loop to undo boat placement
-                lef -= 1
-                y -= 1
-                hidden[top][lef] = "."
-            continue  # if boats collide, it will repeat to same boat
-        time += 1
-
-time = 1
-boat = 5
-while time < 6: #player boat placement
-    y = 1
-    top = -1
-    lef = -1
-    orient = ""
-    print("|\n|\n|\n|\n|")
-    board()
-    if time == 1: #game timer
-        boat = 5 #variable for boat length (pegs)
-        print("Aircraft Carrier (5 pegs)")
-    elif time == 2:
-        boat = 4
-        print("Battleship (4 pegs)")
-    elif time == 3:
-        boat = 3
-        print("Submarine (3 pegs)")
-    elif time == 4:
-        boat = 3
-        print("Cruiser (3 pegs)")
-    elif time == 5:
-        boat = 2
-        print("Destroyer (2 pegs)")
-    while not (orient == "v" or orient == "h"): #input loop
-        orient = input("Orientation? (v/h)")
-        orient = orient[0].lower()
-        if orient == "v":
-            while not 0 <= top <= (10 - boat): #positions boat placement from top
-                while num.count(top) == 0:
-                    top = input("Space from top?")
-                top = int(top)
-            while not 0 <= lef <= 9: #positioning from left
-                while num.count(lef) == 0:
-                    lef = input("Space from left?")
-                lef = int(lef)
-        elif orient == "h":
-            while not 0 <= top <= 9:
-                while num.count(top) == 0:
-                    top = input("Space from top?")
-                top = int(top)
-            while not 0 <= lef <= (10 - boat):
-                while num.count(lef) == 0:
-                    lef = input("Space from left?")
-                lef = int(lef)
-        else:
-            continue
-    if orient == "h": #graphs out the points for the boat
-        while y <= boat:
-            if player[top][lef] == "O": #checks if a boat was already placed there
-                brk = True
-                while y > 1: #while loop to undo boat placement
-                    lef -= 1
-                    y -= 1
-                    player[top][lef] = "."
-                print("your boats collided! Reposition your boat.")
-                break #if boats collide, it will repeat to same boat
-            player[top][lef] = "O"
-            lef += 1
-            y += 1
-        if brk:
-            brk = False
-            continue
-        time += 1
-    else: #if orientation is vertical
-        while y <= boat:
-            if player[top][lef] == "O":
-                brk = True
-                while y > 1:
-                    top -= 1
-                    y -= 1
-                    player[top][lef] = "."
-                print("your boats collided! Reposition your boat.")
-                break
-            player[top][lef] = "O"
-            top += 1
-            y += 1
-        if brk:
-            brk = False
-            continue
-        time += 1
-enemy()
-board()
-print("you're good to go Cap'n! Where should we shoot?") #boats placed correctly
-print()
-print()
-print()
-print()
-print()
-print()
-print("X = hit, $ = miss") #key for characters
-x = -20 #coordinates of last landed shot
-l = -20
-h = 0
-coun = False
-counc = 0
-for i in player:
-    if i.count("O"):
-        coun = True
-for i in comp:
-    if i.count("X"):
-        counc += i.count("X")
-while coun and counc < 17:
-    top = -1
-    lef = -1
-    #player's turn
-    while not 0 <= lef <= 9: #coordinates for shot
-        while num.count(lef) == 0:
-            lef = str(input("X coordinate?"))
-        lef = int(lef) - 1
-    while not 0 <= top <= 9: #coordinates for shot
-        while num.count(top) == 0:
-            top = str(input("Y coordinate?"))
-        top = int(top) - 1
-    if hidden[top][lef] == "." and comp[top][lef] == ".":
-        comp[top][lef] = "$"
-        print("We missed, Cap'n.")
-    elif hidden[top][lef] == "O" and comp[top][lef] == ".":
-        comp[top][lef] = "X"
-        print("We got 'em!")
-    elif comp[top][lef] == "$" or comp[top][lef] == "X":
-        print("Oops, we already shot there.")
-    else:
-        print("What just happened?")
-    top = -1
-    lef = -1
-    #computer's turn
     while not 0 <= top <= 9 and  not 0 <= lef <= 9: #repeat if not in bounds
         y = 1
         top = -1
@@ -358,6 +271,7 @@ while coun and counc < 17:
             while eshots.count(str(top) + str(lef)):
                 top = random.randint(0, 9)
                 lef = random.randint(0, 9)
+				
     eshots.append(str(top) + str(lef))
     if player[top][lef] == ".":
         player[top][lef] = "$"
@@ -378,22 +292,44 @@ while coun and counc < 17:
         print("They hit us at %i,%i Cap'n!"%(lef + 1, top + 1))
     else:
         print("Their Circuits fried.")
-    enemy()
-    board()
-    print()
-    print()
-    print()
-    print()
-    print()
-    print()
+	return x, l, h
+
+
+#MAIN GAME
+print("      BATTLESHIP")
+#Board setup
+place_boats(hidden, False)
+place_boats(player, True)
+
+#Shows completed board
+print_board(comp)
+print_board(player)
+print("you're good to go Cap'n! Where should we shoot?") #boats placed correctly
+print("\n\n\n\n\n\n")
+
+print("X = hit, $ = miss") #key for characters
+x = -20 #coordinates of last landed shot
+l = -20
+h = 0 #direction the boat is placed
+coun = True
+counc = 0
+while coun and counc < 17: #checks if player won or lost, starts main game loop
+	player_turn()
+	x, l, h = computer_turn(x, l, h)
+	
+    print_board(comp)
+    print_board(player)
+    print("\n\n\n\n\n\n")
+
+	#checks if player won or lost
     coun = False
     for i in player:
         if i.count("O"):
             coun = True
     counc = 0
     for i in comp:
-        if i.count("X"):
-            counc += i.count("X")
+        counc += i.count("X")
+		
 if not coun:
     print("They sunk us Cap'n! I'm going down with the ship!")
     print("It was an honor serving you...")
