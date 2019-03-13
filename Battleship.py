@@ -61,8 +61,8 @@ def place_boats(board, player): #player: True for human, False for computer
 		choice = ""
 
 		if player:
-			print("|\n|\n|\n|\n|")
-			print_board(player, True)
+			print("\n\n\n\n\n")
+			print_board(player_board, True)
 		
 		if time == 1: #game timer
 			boat = 5 #variable for boat length (pegs)
@@ -310,6 +310,7 @@ print_board(player_board, True)
 print("you're good to go Cap'n! Where should we shoot?") #boats placed correctly
 print("\n\n\n\n\n\n")
 
+#Loop for taking shots
 print("X = hit, $ = miss") #key for characters
 x = -20 #coordinates of last landed shot
 l = -20
