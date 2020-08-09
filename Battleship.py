@@ -1,80 +1,10 @@
 from random import randint
-eshots = []  # array of all enemy shots, listed in the form of "(top)(left)"
-numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
-playerBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
-
-computerBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
-
-hiddenBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
-               [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
-
-
-def coordString(coords):
-    if len(coords) == 2:
-        return str(coords[0]) + str(coords[1])
-    else:
-        raise TypeError(
-            'Unexpected coordinate length in coordString() function')
-
-
-def onBoard(coords):
-    """simplifies a lot of logic to tell if the coords are within the board"""
-    if len(coords) == 1:
-        return 0 <= coords[0] <= 9
-    elif len(coords) == 2:
-        return 0 <= coords[0] <= 9 and 0 <= coords[1] <= 9
-    else:
-        raise IndexError('used more than 2 arguments for onBoard() function')
-
-
-def printBoard(input_board, player=True):
-    """Outputs the board specified"""
-    if player:
-        print("      YOUR BOATS")
-    else:
-        print("      ENEMY BOATS")
-    print("   1 2 3 4 5 6 7 8 9 10")
-    print("1  " + " ".join(input_board[0]))
-    print("2  " + " ".join(input_board[1]))
-    print("3  " + " ".join(input_board[2]))
-    print("4  " + " ".join(input_board[3]))
-    print("5  " + " ".join(input_board[4]))
-    print("6  " + " ".join(input_board[5]))
-    print("7  " + " ".join(input_board[6]))
-    print("8  " + " ".join(input_board[7]))
-    print("9  " + " ".join(input_board[8]))
-    print("10 " + " ".join(input_board[9]))
+from Boards import *
 
 
 def getVerticalOrHorizontal(player):
-    """return true if vertical, false if horizontal"""
+    """Return true if vertical, false if horizontal"""
     if player:
         choice = ""
         while not (choice == "v" or choice == "h"):  # input loop
@@ -92,7 +22,7 @@ def getVerticalOrHorizontal(player):
 
 
 def getBoatPlacementCoords(player, vertical, boatLength):
-    """gets the coordinates for the given boat for placement"""
+    """Gets the coordinates for the given boat for placement"""
     top = -1
     left = -1
     if vertical:
@@ -126,7 +56,7 @@ def getBoatPlacementCoords(player, vertical, boatLength):
 
 
 def placeBoat(boatLength, board, vertical, top, left):
-    """places the boat on the board, if unsuccessful, it will ask the user to replace their boat"""
+    """Places the boat on the board, if unsuccessful, it will ask the user to replace their boat"""
     boatPegsPlaced = 0
     while boatPegsPlaced < boatLength and board[top][left] != "O":
         board[top][left] = "O"
@@ -398,7 +328,7 @@ def battleshipGame():
 
     if computerHit == 17:
         print("Captain we are victorious! Thanks to your fearless leadership.")
-    else:
+    else:  # player not alive :(
         print("They sunk us Cap'n! I'm going down with the ship!")
         print("It was an honor serving you...")
 
