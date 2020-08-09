@@ -139,29 +139,29 @@ def playerTurn():
 def ComputerTryContinueShot(data):
     """Tries to shoot along a boat after 2 successful hits"""
     direction = data['direction']
-    x = data['x']
+    t = data['t']
     l = data['l']
     top = -1
     left = -1
 
     if direction:
         if direction == 'up':  # if boat upwards
-            newX = x - 1
+            newX = t - 1
             newL = l
             change = newX
-            changeVar = 'x'
+            changeVar = 't'
         elif direction == 'down':  # if boat down
-            newX = x + 1
+            newX = t + 1
             newL = l
             change = newX
-            changeVar = 'x'
+            changeVar = 't'
         elif direction == 'right':  # if boat to the right
-            newX = x
+            newX = t
             newL = l + 1
             change = newL
             changeVar = 'l'
         elif direction == 'left':  # if boat to the left
-            newX = x
+            newX = t
             newL = l - 1
             change = newL
             changeVar = 'l'
@@ -170,30 +170,30 @@ def ComputerTryContinueShot(data):
             top = newX
             left = newL
         else:  # turns h to opposite
-            if changeVar == 'x':
-                y = x - change  # y = 1 or -1
-                while playerBoard[x + y][l] == "X" and onBoard([x + y]):
+            if changeVar == 't':
+                y = t - change  # y = 1 or -1
+                while playerBoard[t + y][l] == "X" and onBoard([t + y]):
                     y = y + 1 if y > 0 else y - 1
-                newX = x + y
+                newX = t + y
                 newL = l
                 change = newX
             else:
                 y = l - change  # y = 1 or -1
-                while playerBoard[x][l + y] == "X" and onBoard([l + y]):
+                while playerBoard[t][l + y] == "X" and onBoard([l + y]):
                     y = y + 1 if y > 0 else y - 1
-                newX = x
+                newX = t
                 newL = l + y
                 change = newL
             if coordString([newX, newL]) not in eshots and onBoard([change]) and abs(y) < 5:
                 top = newX
                 left = newL
             else:
-                x = -20
+                t = -20
                 l = -20
                 direction = ''
 
     newData = {
-        'x': x,  # coordinates of last landed shot
+        't': t,  # coordinates of last landed shot
         'l': l,
         'direction': direction,  # direction the boat is placed
         'top': top,  # coordinates for current shot
@@ -212,18 +212,18 @@ def handleCompHitOrMiss(d):  # d stands for data
               (d['left'] + 1, d['top'] + 1))
         return d, 0
     elif playerBoard[d['top']][d['left']] == "O":
-        if onBoard([d['x'], d['l']]):
-            if d['top'] - d['x'] == -1:
+        if onBoard([d['t'], d['l']]):
+            if d['top'] - d['t'] == -1:
                 d['direction'] = 'up'
             elif d['left'] - d['l'] == 1:
                 d['direction'] = 'right'
-            elif d['top'] - d['x'] == 1:
+            elif d['top'] - d['t'] == 1:
                 d['direction'] = 'down'
             elif d['left'] - d['l'] == -1:
                 d['direction'] = 'left'
             else:
                 raise EnvironmentError('Unknown direction for computer shot')
-        d['x'] = d['top']
+        d['t'] = d['top']
         d['l'] = d['left']
         playerBoard[d['top']][d['left']] = "X"
         print("They hit us at %i,%i Cap'n!" %
@@ -243,32 +243,32 @@ def computerTurn(d):  # d stands for data
         d = ComputerTryContinueShot(d)
 
         # loop through all directions
-        if d['direction'] == '' and onBoard([d['x'], d['l']]):
+        if d['direction'] == '' and onBoard([d['t'], d['l']]):
             d['direction'] = 'up'
             while d['direction']:
-                if d['direction'] == 'up' and (d['x'] - 1) >= 0 and coordString([d['x'] - 1, d['l']]) not in eshots:
-                    d['top'] = d['x'] - 1
+                if d['direction'] == 'up' and (d['t'] - 1) >= 0 and coordString([d['t'] - 1, d['l']]) not in eshots:
+                    d['top'] = d['t'] - 1
                     d['left'] = d['l']
                     d['direction'] = ''
                     break
                 else:
                     d['direction'] = 'right'
-                if d['direction'] == 'right' and (d['l'] + 1) <= 9 and coordString([d['x'], d['l'] + 1]) not in eshots:
-                    d['top'] = d['x']
+                if d['direction'] == 'right' and (d['l'] + 1) <= 9 and coordString([d['t'], d['l'] + 1]) not in eshots:
+                    d['top'] = d['t']
                     d['left'] = d['l'] + 1
                     d['direction'] = ''
                     break
                 else:
                     d['direction'] = 'down'
-                if d['direction'] == 'down' and (d['x'] + 1) <= 9 and coordString([d['x'] + 1, d['l']]) not in eshots:
-                    d['top'] = d['x'] + 1
+                if d['direction'] == 'down' and (d['t'] + 1) <= 9 and coordString([d['t'] + 1, d['l']]) not in eshots:
+                    d['top'] = d['t'] + 1
                     d['left'] = d['l']
                     d['direction'] = ''
                     break
                 else:
                     d['direction'] = 'left'
-                if d['direction'] == 'left' and (d['l'] - 1) >= 0 and coordString([d['x'], d['l'] - 1]) not in eshots:
-                    d['top'] = d['x']
+                if d['direction'] == 'left' and (d['l'] - 1) >= 0 and coordString([d['t'], d['l'] - 1]) not in eshots:
+                    d['top'] = d['t']
                     d['left'] = d['l'] - 1
                     d['direction'] = ''
                     break
@@ -303,8 +303,8 @@ def battleshipGame():
     # Loop for taking shots
     print("X = hit, $ = miss")  # key for characters
     shotData = {
-        'x': -20,  # coordinates of last landed shot
-        'l': -20,
+        't': -20,  # coordinates of last landed shot
+        'l': -20,  # t = top (y), l = left (x)
         'direction': '',  # direction the boat is placed
         'top': -1,  # coordinates for current shot
         'left': -1
