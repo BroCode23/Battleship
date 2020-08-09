@@ -35,6 +35,12 @@ hiddenBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
 
 
+def gameOutput(message, player=True):
+    """if player variable is set, output message"""
+    if player:
+        print(message)
+
+
 def coordString(coords):
     """Creates a string of coordinates to use to track places the computer has shot"""
     if len(coords) == 2:

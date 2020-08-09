@@ -26,37 +26,30 @@ def getBoatPlacementCoords(player, vertical, boatLength):
     top = -1
     left = -1
     if vertical:
-        if player:
-            # positions boat placement from top
-            while not 0 <= top <= (10 - boatLength):
-                while top not in numbers:
-                    top = input("Space from top?")
-                top = int(top)
-            while not 0 <= left <= 9:  # positioning from left
-                while left not in numbers:
-                    left = input("Space from left?")
-                left = int(left)
-        else:
-            top = randint(0, (9 - boatLength))
-            left = randint(0, 9)
+        maxSpaceFromTop = 10 - boatLength
+        maxSpaceFromLeft = 9
+    else:  # horizontal
+        maxSpaceFromTop = 9
+        maxSpaceFromLeft = 10 - boatLength
+
+    if player:
+        # positions boat placement
+        while not 0 <= top <= maxSpaceFromTop:
+            while top not in numbers:
+                top = input("Space from top?")
+            top = int(top)
+        while not 0 <= left <= maxSpaceFromLeft:
+            while left not in numbers:
+                left = input("Space from left?")
+            left = int(left)
     else:
-        if player:
-            while not 0 <= top <= 9:
-                while top not in numbers:
-                    top = input("Space from top?")
-                top = int(top)
-            while not 0 <= left <= (10 - boatLength):
-                while left not in numbers:
-                    left = input("Space from left?")
-                left = int(left)
-        else:
-            top = randint(0, 9)
-            left = randint(0, (9 - boatLength))
+        top = randint(0, maxSpaceFromTop)
+        left = randint(0, maxSpaceFromLeft)
     return top, left
 
 
 def placeBoat(boatLength, board, vertical, top, left):
-    """Places the boat on the board, if unsuccessful, it will ask the user to replace their boat"""
+    """Places the boat on the board, if unsuccessful, it will return false"""
     boatPegsPlaced = 0
     while boatPegsPlaced < boatLength and board[top][left] != "O":
         board[top][left] = "O"
@@ -81,34 +74,26 @@ def placeBoat(boatLength, board, vertical, top, left):
 def placeBoats(board, player):  # player: True for human, False for computer
     """Places boats onto the board to set up the game"""
     time = 1
-    while time < 6:  # computer boat placement
+    while time <= 5:  # computer boat placement
         if player:
             print("\n\n\n\n\n")
             printBoard(playerBoard, True)
 
         if time == 1:  # game timer
             boat = 5  # variable for boat length (pegs)
-            if player:
-                print("Aircraft Carrier (5 pegs)")
+            gameOutput("Aircraft Carrier (5 pegs)", player)
         elif time == 2:
             boat = 4
-            if player:
-                print("Battleship (4 pegs)")
+            gameOutput("Battleship (4 pegs)", player)
         elif time == 3:
             boat = 3
-            if player:
-                print("Submarine (3 pegs)")
+            gameOutput("Submarine (3 pegs)", player)
         elif time == 4:
             boat = 3
-            if player:
-                print("Cruiser (3 pegs)")
+            gameOutput("Cruiser (3 pegs)", player)
         elif time == 5:
             boat = 2
-            if player:
-                print("Destroyer (2 pegs)")
-        else:
-            time = 1
-            continue
+            gameOutput("Destroyer (2 pegs)", player)
 
         vertical = getVerticalOrHorizontal(player)
 
@@ -119,8 +104,7 @@ def placeBoats(board, player):  # player: True for human, False for computer
         if boatPlaced:
             time += 1
         else:
-            if player:
-                print("your boats collided! Reposition your boat.")
+            gameOutput("your boats collided! Reposition your boat.", player)
     return
 
 
@@ -129,159 +113,175 @@ def playerTurn():
     top = -1
     left = -1
     # player's turn
-    while not 0 <= left <= 9:  # coordinates for shot
+    while not onBoard([left]):  # coordinates for shot
         while left not in numbers:
             left = input("X coordinate?")
         left = int(left) - 1
-    while not 0 <= top <= 9:  # coordinates for shot
+    while not onBoard([top]):  # coordinates for shot
         while top not in numbers:
             top = input("Y coordinate?")
         top = int(top) - 1
     if hiddenBoard[top][left] == "." and computerBoard[top][left] == ".":
         computerBoard[top][left] = "$"
         print("We missed, Cap'n.")
+        return 0
     elif hiddenBoard[top][left] == "O" and computerBoard[top][left] == ".":
         computerBoard[top][left] = "X"
         print("We got 'em!")
+        return 1
     elif computerBoard[top][left] == "$" or computerBoard[top][left] == "X":
         print("Oops, we already shot there.")
+        return 0
     else:
-        print("What just happened?")
-    return
+        raise EnvironmentError('hidden or computer board not set up correctly')
 
 
 def ComputerTryContinueShot(data):
     """Tries to shoot along a boat after 2 successful hits"""
-    data['top'] = -1
-    data['left'] = -1
-    if data['h']:
-        if data['h'] == 'up':  # if boat upwards
-            newX = data['x'] - 1
-            newL = data['l']
+    direction = data['direction']
+    x = data['x']
+    l = data['l']
+    top = -1
+    left = -1
+
+    if direction:
+        if direction == 'up':  # if boat upwards
+            newX = x - 1
+            newL = l
             change = newX
             changeVar = 'x'
-        elif data['h'] == 'right':  # if boat to the right
-            newX = data['x']
-            newL = data['l'] + 1
+        elif direction == 'down':  # if boat down
+            newX = x + 1
+            newL = l
+            change = newX
+            changeVar = 'x'
+        elif direction == 'right':  # if boat to the right
+            newX = x
+            newL = l + 1
             change = newL
             changeVar = 'l'
-        elif data['h'] == 'down':  # if boat down
-            newX = data['x'] + 1
-            newL = data['l']
-            change = newX
-            changeVar = 'x'
-        elif data['h'] == 'left':  # if boat to the left
-            newX = data['x']
-            newL = data['l'] - 1
+        elif direction == 'left':  # if boat to the left
+            newX = x
+            newL = l - 1
             change = newL
             changeVar = 'l'
 
         if coordString([newX, newL]) not in eshots and onBoard([change]):
-            data['top'] = newX
-            data['left'] = newL
+            top = newX
+            left = newL
         else:  # turns h to opposite
             if changeVar == 'x':
-                y = data['x'] - change  # y = 1 or -1
-                while playerBoard[data['x'] + y][data['l']] == "X" and onBoard([data['x'] + y]):
+                y = x - change  # y = 1 or -1
+                while playerBoard[x + y][l] == "X" and onBoard([x + y]):
                     y = y + 1 if y > 0 else y - 1
-                newX = data['x'] + y
-                newL = data['l']
+                newX = x + y
+                newL = l
                 change = newX
             else:
-                y = data['l'] - change  # y = 1 or -1
-                while playerBoard[data['x']][data['l'] + y] == "X" and onBoard([data['l'] + y]):
+                y = l - change  # y = 1 or -1
+                while playerBoard[x][l + y] == "X" and onBoard([l + y]):
                     y = y + 1 if y > 0 else y - 1
-                newX = data['x']
-                newL = data['l'] + y
+                newX = x
+                newL = l + y
                 change = newL
             if coordString([newX, newL]) not in eshots and onBoard([change]) and abs(y) < 5:
-                data['top'] = newX
-                data['left'] = newL
+                top = newX
+                left = newL
             else:
-                data['x'] = -20
-                data['l'] = -20
-                data['h'] = ''
-    return data
+                x = -20
+                l = -20
+                direction = ''
+
+    newData = {
+        'x': x,  # coordinates of last landed shot
+        'l': l,
+        'direction': direction,  # direction the boat is placed
+        'top': top,  # coordinates for current shot
+        'left': left
+    }
+    return newData
 
 
-def handleCompHitOrMiss(data):
+def handleCompHitOrMiss(d):  # d stands for data
     """Logs the computer shot in the eshots array and outputs text based on a hit or miss"""
-    eshots.append(coordString([data['top'], data['left']]))
-    if playerBoard[data['top']][data['left']] == ".":
-        playerBoard[data['top']][data['left']] = "$"
+
+    eshots.append(coordString([d['top'], d['left']]))
+    if playerBoard[d['top']][d['left']] == ".":
+        playerBoard[d['top']][d['left']] = "$"
         print("The enemy missed at %i,%i." %
-              (data['left'] + 1, data['top'] + 1))
-    elif playerBoard[data['top']][data['left']] == "O":
-        if onBoard([data['x'], data['l']]):
-            if data['top'] - data['x'] == -1:
-                data['h'] = 'up'
-            elif data['left'] - data['l'] == 1:
-                data['h'] = 'right'
-            elif data['top'] - data['x'] == 1:
-                data['h'] = 'down'
-            elif data['left'] - data['l'] == -1:
-                data['h'] = 'left'
+              (d['left'] + 1, d['top'] + 1))
+        return d, 0
+    elif playerBoard[d['top']][d['left']] == "O":
+        if onBoard([d['x'], d['l']]):
+            if d['top'] - d['x'] == -1:
+                d['direction'] = 'up'
+            elif d['left'] - d['l'] == 1:
+                d['direction'] = 'right'
+            elif d['top'] - d['x'] == 1:
+                d['direction'] = 'down'
+            elif d['left'] - d['l'] == -1:
+                d['direction'] = 'left'
             else:
                 raise EnvironmentError('Unknown direction for computer shot')
-        data['x'] = data['top']
-        data['l'] = data['left']
-        playerBoard[data['top']][data['left']] = "X"
+        d['x'] = d['top']
+        d['l'] = d['left']
+        playerBoard[d['top']][d['left']] = "X"
         print("They hit us at %i,%i Cap'n!" %
-              (data['left'] + 1, data['top'] + 1))
-    else:
-        print("Their Circuits fried.")
-    return data
+              (d['left'] + 1, d['top'] + 1))
+        return d, 1
+
+    print("Their Circuits fried.")
+    raise EnvironmentError('Computer didn\'t hit or miss')
 
 
-def computerTurn(data):
+def computerTurn(d):  # d stands for data
     """Computer shoots at a random spot on the board, and if it hits it tries to shoot around the same spot"""
-    data['top'] = -1
-    data['left'] = -1
-    while not onBoard([data['top'], data['left']]):  # repeat if not in bounds
+    d['top'] = -1
+    d['left'] = -1
+    while not onBoard([d['top'], d['left']]):  # repeat if not in bounds
 
-        ComputerTryContinueShot(data)
+        d = ComputerTryContinueShot(d)
 
         # loop through all directions
-        if data['h'] == '' and onBoard([data['x'], data['l']]):
-            data['h'] = 'up'
-            while data['h']:
-                if data['h'] == 'up' and (data['x'] - 1) >= 0 and (str(data['x'] - 1) + str(data['l'])) not in eshots:
-                    data['top'] = data['x'] - 1
-                    data['left'] = data['l']
-                    data['h'] = ''
+        if d['direction'] == '' and onBoard([d['x'], d['l']]):
+            d['direction'] = 'up'
+            while d['direction']:
+                if d['direction'] == 'up' and (d['x'] - 1) >= 0 and coordString([d['x'] - 1, d['l']]) not in eshots:
+                    d['top'] = d['x'] - 1
+                    d['left'] = d['l']
+                    d['direction'] = ''
                     break
                 else:
-                    data['h'] = 'right'
-                if data['h'] == 'right' and (data['l'] + 1) <= 9 and (str(data['x']) + str(data['l'] + 1)) not in eshots:
-                    data['top'] = data['x']
-                    data['left'] = data['l'] + 1
-                    data['h'] = ''
+                    d['direction'] = 'right'
+                if d['direction'] == 'right' and (d['l'] + 1) <= 9 and coordString([d['x'], d['l'] + 1]) not in eshots:
+                    d['top'] = d['x']
+                    d['left'] = d['l'] + 1
+                    d['direction'] = ''
                     break
                 else:
-                    data['h'] = 'down'
-                if data['h'] == 'down' and (data['x'] + 1) <= 9 and (str(data['x'] + 1) + str(data['l'])) not in eshots:
-                    data['top'] = data['x'] + 1
-                    data['left'] = data['l']
-                    data['h'] = ''
+                    d['direction'] = 'down'
+                if d['direction'] == 'down' and (d['x'] + 1) <= 9 and coordString([d['x'] + 1, d['l']]) not in eshots:
+                    d['top'] = d['x'] + 1
+                    d['left'] = d['l']
+                    d['direction'] = ''
                     break
                 else:
-                    data['h'] = 'left'
-                if data['h'] == 'left' and (data['l'] - 1) >= 0 and (str(data['x']) + str(data['l'] - 1)) not in eshots:
-                    data['top'] = data['x']
-                    data['left'] = data['l'] - 1
-                    data['h'] = ''
+                    d['direction'] = 'left'
+                if d['direction'] == 'left' and (d['l'] - 1) >= 0 and coordString([d['x'], d['l'] - 1]) not in eshots:
+                    d['top'] = d['x']
+                    d['left'] = d['l'] - 1
+                    d['direction'] = ''
                     break
                 else:
-                    data['h'] = ''
-        if not onBoard([data['top'], data['left']]):  # take a random shot
-            data['top'] = randint(0, 9)
-            data['left'] = randint(0, 9)
-            while coordString([data['top'], data['left']]) in eshots:
-                data['top'] = randint(0, 9)
-                data['left'] = randint(0, 9)
+                    d['direction'] = ''
+        if not onBoard([d['top'], d['left']]):  # take a random shot
+            d['top'] = randint(0, 9)
+            d['left'] = randint(0, 9)
+            while coordString([d['top'], d['left']]) in eshots:
+                d['top'] = randint(0, 9)
+                d['left'] = randint(0, 9)
 
-    handleCompHitOrMiss(data)
-    return data
+    return handleCompHitOrMiss(d)
 
 
 def battleshipGame():
@@ -295,6 +295,7 @@ def battleshipGame():
     # Shows completed board
     printBoard(computerBoard, False)
     printBoard(playerBoard, True)
+
     # boats placed correctly
     print("you're good to go Cap'n! Where should we shoot?")
     print("\n\n\n\n\n\n")
@@ -304,33 +305,31 @@ def battleshipGame():
     shotData = {
         'x': -20,  # coordinates of last landed shot
         'l': -20,
-        'h': ''  # direction the boat is placed
+        'direction': '',  # direction the boat is placed
+        'top': -1,  # coordinates for current shot
+        'left': -1
     }
 
-    playerAlive = True
-    computerHit = 0
-    while playerAlive and computerHit < 17:  # checks if player won or lost, starts main game loop
-        playerTurn()
-        shotData = computerTurn(shotData)
+    playerPegsLeft = 17
+    computerPegsLeft = 17
+    # checks if player won or lost, starts main game loop
+    while playerPegsLeft and computerPegsLeft:
+        # turn functions return 1 if hit, else 0
+        computerPegsLeft -= playerTurn()
+        shotData, computerHit = computerTurn(shotData)
+        playerPegsLeft -= computerHit
 
         printBoard(computerBoard, False)
         printBoard(playerBoard, True)
         print("\n\n\n\n\n\n")
 
-        # checks if player won or lost
-        playerAlive = False
-        for i in playerBoard:
-            if i.count("O"):
-                playerAlive = True
-        computerHit = 0
-        for i in computerBoard:
-            computerHit += i.count("X")
-
-    if computerHit == 17:
-        print("Captain we are victorious! Thanks to your fearless leadership.")
-    else:  # player not alive :(
-        print("They sunk us Cap'n! I'm going down with the ship!")
+    if not computerPegsLeft and playerPegsLeft:
+        print("Cap'n we are victorious! Thanks to yerr fearless leadership.")
+    elif not playerPegsLeft and computerPegsLeft:  # player not alive :(
+        print("They sunk our fleet Cap'n! I'm going down with the ship!")
         print("It was an honor serving you...")
+    else:
+        print("It was a tie?? How is that possible??")
 
 
 battleshipGame()
