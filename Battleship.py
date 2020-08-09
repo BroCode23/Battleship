@@ -1,6 +1,6 @@
-import random
+from random import randint
 eshots = [] #array of all enemy shots, listed in the form of "(top)(left)"
-numbers = ["0","1","2","3","4","5","6","7","8","9","10"]
+numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
 playerBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
@@ -35,7 +35,22 @@ hiddenBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                 [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
 
-def printBoard(input_board, player):
+def coordString(coords):
+    if len(coords) == 2:
+        return str(coords[0]) + str(coords[1])
+    else:
+        raise TypeError('Unexpected coordinate length in coordString() function')
+
+def onBoard(coords):
+    """simplifies a lot of logic to tell if the coords are within the board"""
+    if len(coords) == 1:
+        return 0 <= coords[0] <= 9
+    elif len(coords) == 2:
+        return 0 <= coords[0] <= 9 and 0 <= coords[1] <= 9
+    else:
+        raise IndexError('used more than 2 arguments for onBoard() function')
+
+def printBoard(input_board, player = True):
     """Outputs the board specified"""
     if player:
         print("      YOUR BOATS")
@@ -58,14 +73,17 @@ def getVerticalOrHorizontal(player):
     if player:
         choice = ""
         while not (choice == "v" or choice == "h"): #input loop
-            choice = input("Orientation? (v/h)")[0].lower()
+            choice = input("Orientation? (v/h)")
+            if not choice:
+                continue
+            choice = choice[0].lower()
         if choice == "v":
             vertical = True
         elif choice == "h":
             vertical = False
         return vertical
     else:
-        return random.randint(0, 1)
+        return randint(0, 1)
 
 def getBoatPlacementCoords(player, vertical, boatLength):
     """gets the coordinates for the given boat for placement"""
@@ -82,8 +100,8 @@ def getBoatPlacementCoords(player, vertical, boatLength):
                     left = input("Space from left?")
                 left = int(left)
         else:
-            top = random.randint(0, (9 - boatLength))
-            left = random.randint(0, 9)
+            top = randint(0, (9 - boatLength))
+            left = randint(0, 9)
     else:
         if player:
             while not 0 <= top <= 9:
@@ -95,8 +113,8 @@ def getBoatPlacementCoords(player, vertical, boatLength):
                     left = input("Space from left?")
                 left = int(left)
         else:
-            top = random.randint(0, 9)
-            left = random.randint(0, (9 - boatLength))
+            top = randint(0, 9)
+            left = randint(0, (9 - boatLength))
     return top, left
 
 def placeBoat(boatLength, board, vertical, top, left):
@@ -191,170 +209,177 @@ def playerTurn():
         print("What just happened?")
     return
 
-def computerTurn(x, l, h):
-    """Computer shoots at a random spot on the board, and if it hits it tries to shoot around the same spot"""
-    top = -1
-    left = -1
-    while not 0 <= top <= 9 and  not 0 <= left <= 9: #repeat if not in bounds
-        y = 1
-        top = -1
-        left = -1
-        if h == 1: #if boat upwards
-            if not eshots.count(str(x - 1) + str(l)) and 0 <= x - 1 <= 9:
-                top = x - 1
-                left = l
-            else: #turns h to 3
-                while playerBoard[x + y][l] == "X" and 0 <= x + y <= 9:
-                    y += 1
-                if not eshots.count(str(x + y) + str(l)) and 0 <= x + y <= 9 and y < 5:
-                    top = x + y
-                    left = l
-                else:
-                    x = -20
-                    l = -20
-                    h = 0
-        if h == 2:  # if boat to the right
-            if not eshots.count(str(x) + str(l + 1)) and 0 <= l + 1 <= 9:
-                top = x
-                left = l + 1
-            else: # turns h to 4
-                while playerBoard[x][l - y] == "X" and 0 <= l - y <= 9:
-                    y += 1
-                if not eshots.count(str(x) + str(l - y)) and 0 <= l - y <= 9 and y < 5:
-                    top = x
-                    left = l - y
-                else:
-                    x = -20
-                    l = -20
-                    h = 0
-        if h == 3: #if boat downwards
-            if not eshots.count(str(x + 1) + str(l)) and 0 <= x + 1 <= 9:
-                top = x + 1
-                left = l
-            else: #turn h to 1
-                while playerBoard[x - y][l] == "X" and 0 <= x - y <= 9: #checks through the other side of the boat
-                    y += 1
-                if not eshots.count(str(x - y) + str(l)) and 0 <= x - y <= 9 and y < 5:
-                    top = x - y
-                    left = l
-                else:
-                    x = -20
-                    l = -20
-                    h = 0
-        if h == 4:  # if boat to the left
-            if not eshots.count(str(x) + str(l - 1)) and 0 <= l - 1 <= 9:
-                top = x
-                left = l - 1
-            else: # turns h to 2
-                while playerBoard[x][l + y] == "X" and 0 <= l + y <= 9:
-                    y += 1
-                if not eshots.count(str(x) + str(l + y)) and 0 <= l + y <= 9 and y < 5:
-                    top = x
-                    left = l + y
-                else:
-                    x = -20
-                    l = -20
-                    h = 0
-        if h == 0 and 0 <= x <= 9 and 0 <= l <= 9:
-            h = 1
-            while 0 < h < 6:
-                if h == 1 and (x - 1) >= 0 and not eshots.count(str(x - 1) + str(l)):
-                    top = x - 1
-                    left = l
-                    h = 0
-                    continue
-                if h == 2 and (l + 1) <= 9 and not eshots.count(str(x) + str(l + 1)):
-                    top = x
-                    left = l + 1
-                    h = 0
-                    continue
-                if h == 3 and (x + 1) <= 9 and not eshots.count(str(x + 1) + str(l)):
-                    top = x + 1
-                    left = l
-                    h = 0
-                    continue
-                if h == 4 and (l - 1) >= 0 and not eshots.count(str(x) + str(l - 1)):
-                    top = x
-                    left = l - 1
-                    h = 0
-                    continue
-                if h == 5:
-                    top = random.randint(0, 9)
-                    left = random.randint(0, 9)
-                    while eshots.count(str(top) + str(left)):
-                        top = random.randint(0, 9)
-                        left = random.randint(0, 9)
-                    h = 0
-                    continue
-                h += 1
-        if not 0 <= top <= 9 or not 0 <= left <= 9:
-            top = random.randint(0, 9)
-            left = random.randint(0, 9)
-            while eshots.count(str(top) + str(left)):
-                top = random.randint(0, 9)
-                left = random.randint(0, 9)
+def ComputerTryContinueShot(data):
+    data['top'] = -1
+    data['left'] = -1
+    if data['h']:
+        if data['h'] == 'up': #if boat upwards
+            newX = data['x'] - 1
+            newL = data['l']
+            change = newX
+            changeVar = 'x'
+        elif data['h'] == 'right': #if boat to the right
+            newX = data['x']
+            newL = data['l'] + 1
+            change = newL
+            changeVar = 'l'
+        elif data['h'] == 'down': #if boat down
+            newX = data['x'] + 1
+            newL = data['l']
+            change = newX
+            changeVar = 'x'
+        elif data['h'] == 'left': #if boat to the left
+            newX = data['x']
+            newL = data['l'] - 1
+            change = newL
+            changeVar = 'l'
 
-    eshots.append(str(top) + str(left))
-    if playerBoard[top][left] == ".":
-        playerBoard[top][left] = "$"
-        print("The enemy missed at %i,%i." % (left + 1, top + 1))
-    elif playerBoard[top][left] == "O":
-        if 0 <= x <= 9 and 0 <= l <= 9:
-            if top - x == 1:
-                h = 3
-            if top - x == -1:
-                h = 1
-            if left - l == 1:
-                h = 2
-            if left - l == -1:
-                h = 4
-        x = top
-        l = left
-        playerBoard[top][left] = "X"
-        print("They hit us at %i,%i Cap'n!"%(left + 1, top + 1))
+        if coordString([newX, newL]) not in eshots and onBoard([change]):
+            data['top'] = newX
+            data['left'] = newL
+        else: #turns h to opposite
+            if changeVar == 'x':
+                y = data['x'] - change # y = 1 or -1
+                while playerBoard[data['x'] + y][data['l']] == "X" and onBoard([data['x'] + y]):
+                    y = y + 1 if y > 0 else y - 1
+                newX = data['x'] + y
+                newL = data['l']
+                change = newX
+            else:
+                y = data['l'] - change # y = 1 or -1
+                while playerBoard[data['x']][data['l'] + y] == "X" and onBoard([data['l'] + y]):
+                    y = y + 1 if y > 0 else y - 1
+                newX = data['x']
+                newL = data['l'] + y
+                change = newL
+            if coordString([newX, newL]) not in eshots and onBoard([change]) and abs(y) < 5:
+                data['top'] = newX
+                data['left'] = newL
+            else:
+                data['x'] = -20
+                data['l'] = -20
+                data['h'] = ''
+    return data
+
+def handleCompHitOrMiss(data):
+    eshots.append(coordString([data['top'], data['left']]))
+    if playerBoard[data['top']][data['left']] == ".":
+        playerBoard[data['top']][data['left']] = "$"
+        print("The enemy missed at %i,%i." % (data['left'] + 1, data['top'] + 1))
+    elif playerBoard[data['top']][data['left']] == "O":
+        if onBoard([data['x'], data['l']]):
+            if data['top'] - data['x'] == -1:
+                data['h'] = 'up'
+            elif data['left'] - data['l'] == 1:
+                data['h'] = 'right'
+            elif data['top'] - data['x'] == 1:
+                data['h'] = 'down'
+            elif data['left'] - data['l'] == -1:
+                data['h'] = 'left'
+            else:
+                raise EnvironmentError('Unknown direction for computer shot')
+        data['x'] = data['top']
+        data['l'] = data['left']
+        playerBoard[data['top']][data['left']] = "X"
+        print("They hit us at %i,%i Cap'n!"%(data['left'] + 1, data['top'] + 1))
     else:
         print("Their Circuits fried.")
-    return x, l, h
+    return data
 
-#MAIN GAME
+def computerTurn(data):
+    """Computer shoots at a random spot on the board, and if it hits it tries to shoot around the same spot"""
+    data['top'] = -1
+    data['left'] = -1
+    while not onBoard([data['top'], data['left']]): #repeat if not in bounds
 
-#Board setup
-print("      BATTLESHIP")
-placeBoats(hiddenBoard, False)
-placeBoats(playerBoard, True)
+        ComputerTryContinueShot(data)
 
-#Shows completed board
-printBoard(computerBoard, False)
-printBoard(playerBoard, True)
-print("you're good to go Cap'n! Where should we shoot?") #boats placed correctly
-print("\n\n\n\n\n\n")
+        if data['h'] == '' and onBoard([data['x'], data['l']]): # loop through all directions
+            data['h'] = 'up'
+            while data['h']:
+                if data['h'] == 'up' and (data['x'] - 1) >= 0 and (str(data['x'] - 1) + str(data['l'])) not in eshots:
+                    data['top'] = data['x'] - 1
+                    data['left'] = data['l']
+                    data['h'] = ''
+                    break
+                else:
+                    data['h'] = 'right'
+                if data['h'] == 'right' and (data['l'] + 1) <= 9 and (str(data['x']) + str(data['l'] + 1)) not in eshots:
+                    data['top'] = data['x']
+                    data['left'] = data['l'] + 1
+                    data['h'] = ''
+                    break
+                else:
+                    data['h'] = 'down'
+                if data['h'] == 'down' and (data['x'] + 1) <= 9 and (str(data['x'] + 1) + str(data['l'])) not in eshots:
+                    data['top'] = data['x'] + 1
+                    data['left'] = data['l']
+                    data['h'] = ''
+                    break
+                else:
+                    data['h'] = 'left'
+                if data['h'] == 'left' and (data['l'] - 1) >= 0 and (str(data['x']) + str(data['l'] - 1)) not in eshots:
+                    data['top'] = data['x']
+                    data['left'] = data['l'] - 1
+                    data['h'] = ''
+                    break
+                else:
+                    data['h'] = ''
+        if not onBoard([data['top'], data['left']]): #take a random shot
+            data['top'] = randint(0, 9)
+            data['left'] = randint(0, 9)
+            while coordString([data['top'], data['left']]) in eshots:
+                data['top'] = randint(0, 9)
+                data['left'] = randint(0, 9)
 
-#Loop for taking shots
-print("X = hit, $ = miss") #key for characters
-x = -20 #coordinates of last landed shot
-l = -20
-h = 0 #direction the boat is placed
-playerAlive = True
-computerHit = 0
-while playerAlive and computerHit < 17: #checks if player won or lost, starts main game loop
-    playerTurn()
-    x, l, h = computerTurn(x, l, h)
+    handleCompHitOrMiss(data)
+    return data
 
+def battleshipGame():
+    """A game of battleship! Player places boats and will play against a computer player"""
+
+    #Board setup
+    print("      BATTLESHIP")
+    placeBoats(hiddenBoard, False)
+    placeBoats(playerBoard, True)
+
+    #Shows completed board
     printBoard(computerBoard, False)
     printBoard(playerBoard, True)
+    print("you're good to go Cap'n! Where should we shoot?") #boats placed correctly
     print("\n\n\n\n\n\n")
 
-    #checks if player won or lost
-    playerAlive = False
-    for i in playerBoard:
-        if i.count("O"):
-            playerAlive = True
+    #Loop for taking shots
+    print("X = hit, $ = miss") #key for characters
+    shotData = {
+        'x': -20, #coordinates of last landed shot
+        'l': -20,
+        'h': '' #direction the boat is placed
+    }
+    
+    playerAlive = True
     computerHit = 0
-    for i in computerBoard:
-        computerHit += i.count("X")
+    while playerAlive and computerHit < 17: #checks if player won or lost, starts main game loop
+        playerTurn()
+        shotData = computerTurn(shotData)
 
-if computerHit == 17:
-    print("Captain we are victorious! Thanks to your fearless leadership.")
-else:
-    print("They sunk us Cap'n! I'm going down with the ship!")
-    print("It was an honor serving you...")
+        printBoard(computerBoard, False)
+        printBoard(playerBoard, True)
+        print("\n\n\n\n\n\n")
+
+        #checks if player won or lost
+        playerAlive = False
+        for i in playerBoard:
+            if i.count("O"):
+                playerAlive = True
+        computerHit = 0
+        for i in computerBoard:
+            computerHit += i.count("X")
+
+    if computerHit == 17:
+        print("Captain we are victorious! Thanks to your fearless leadership.")
+    else:
+        print("They sunk us Cap'n! I'm going down with the ship!")
+        print("It was an honor serving you...")
+
+battleshipGame()
