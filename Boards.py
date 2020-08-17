@@ -1,6 +1,7 @@
-eshots = []  # Array of all enemy shots, listed in the form of "(top)(left)"
-numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+# numbers array used for user input
+NUMBERS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
+# board containing the player's boats and computer's shots
 playerBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
@@ -12,6 +13,7 @@ playerBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
 
+# computer board that shows where the player has shot
 computerBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                  [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                  [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
@@ -23,6 +25,7 @@ computerBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                  [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                  [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
 
+# other computer board that isn't shown to the player
 hiddenBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
@@ -35,29 +38,21 @@ hiddenBoard = [[".", ".", ".", ".", ".", ".", ".", ".", ".", "."],
                [".", ".", ".", ".", ".", ".", ".", ".", ".", "."]]
 
 
-def gameOutput(message, player=True):
-    """if player variable is set, output message"""
-    if player:
-        print(message)
-
-
-def coordString(coords):
+def coordsToString(top, left):
     """Creates a string of coordinates to use to track places the computer has shot"""
-    if len(coords) == 2:
-        return str(coords[0]) + str(coords[1])
-    else:
-        raise TypeError(
-            'Unexpected coordinate length in coordString() function')
+    return str(top) + str(left)
 
 
-def onBoard(coords):
+def stringToCoords(string):
+    """does the opposite of coordsToString"""
+    if len(string) != 2:
+        raise IndexError("string parameter doesn't have expected length")
+    return int(string[0]), int(string[1])
+
+
+def onBoard(top, left=0):
     """Simplifies a lot of logic to tell if the coords are within the board"""
-    if len(coords) == 1:
-        return 0 <= coords[0] <= 9
-    elif len(coords) == 2:
-        return 0 <= coords[0] <= 9 and 0 <= coords[1] <= 9
-    else:
-        raise IndexError('used more than 2 arguments for onBoard() function')
+    return 0 <= top <= 9 and 0 <= left <= 9
 
 
 def printBoard(inputBoard, player=True):
